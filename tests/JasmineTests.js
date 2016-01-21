@@ -156,7 +156,8 @@ describe('Leaflet FreeDraw', function() {
 
         expect(transformed.length).toEqual(6);
         expect(transformed[2].lat).toEqual(85.0511287798066);
-        expect(transformed[2].lng).toEqual(94.99998092651367);
+        // expect(transformed[2].lng).toEqual(94.99998092651367);
+        expect(transformed[2].lng).toEqual(94.99998092651369);
 
     });
 
@@ -447,9 +448,11 @@ describe('Leaflet FreeDraw', function() {
 
         // ...And now let's try to add a polygon elbow instead of deleting.
         polygon   = createMockPolygon();
-        fakeEvent = { originalEvent: { clientX: 12, clientY: 17 } };
+        fakeEvent = { originalEvent: { clientX: 11, clientY: 17 } };
 
-        expect(polygon._latlngs.length).toEqual(5);
+        // polygon._latlngs now can be multipolygon
+        // _latlngs array of arrays
+        expect(polygon._latlngs[0].length).toEqual(5);
         spyOn(freeDraw, 'createEdges').and.callThrough();
         spyOn(freeDraw, 'destroyEdges').and.callThrough();
 
@@ -457,8 +460,10 @@ describe('Leaflet FreeDraw', function() {
         freeDraw.handlePolygonClick(polygon, fakeEvent);
         expect(freeDraw.createEdges).toHaveBeenCalled();
         expect(freeDraw.destroyEdges).toHaveBeenCalled();
-        expect(polygon._latlngs.length).toEqual(6);
 
+        // Leaflet remove last point, if first and last points equals
+        // see Polygon._convertLatLngs method
+        expect(polygon._latlngs[0].length).toEqual(5);
     });
 
     describe('Hull Algorithms:', function() {

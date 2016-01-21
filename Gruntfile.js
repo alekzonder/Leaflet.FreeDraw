@@ -57,10 +57,12 @@ module.exports = function(grunt) {
                 src: ['components/FreeDraw.js', 'components/*.js'],
                 options: {
                     specs: 'tests/JasmineTests.js',
-                    helpers: ['example/js/vendor/leaflet/dist/leaflet-src.js',
+                    helpers: [
+                        'example/js/vendor/leaflet/dist/leaflet-src.js',
                         'example/js/vendor/concavehull/dist/concavehull.js',
                         'example/js/vendor/d3/d3.js',
-                        'example/js/vendor/evispa-timo-jsclipper/clipper_unminified.js']
+                        'example/js/vendor/evispa-timo-jsclipper/clipper_unminified.js'
+                    ]
                 }
             }
         },
@@ -130,8 +132,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
-    grunt.registerTask('build', ['concat', 'uglify', 'copy', 'compress']);
-    grunt.registerTask('test', ['jshint', 'jasmine', 'karma']);
-    grunt.registerTask('default', ['test', 'build']);
+    // grunt.registerTask('build', ['concat', 'uglify', 'copy', 'compress']);
+    grunt.registerTask('test', ['jasmine', 'karma']);
+    // grunt.registerTask('default', ['test', 'build']);
 
 };

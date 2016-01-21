@@ -547,7 +547,18 @@
          */
         latLngsToClipperPoints: function latLngsToClipperPoints(latLngs) {
 
-            return latLngs.map(function forEach(latLng) {
+            // @alekzonder fix
+            var arr;
+
+            if (latLngs.length === 1) {
+                arr = latLngs[0];
+            } else {
+                arr = latLngs;
+            }
+
+            // ----
+
+            return arr.map(function forEach(latLng) {
 
                 var point = this.map.latLngToLayerPoint(latLng);
                 return {
@@ -626,7 +637,8 @@
                 endPoint = new L.Point(),
                 parts = [];
 
-            polygon._latlngs.forEach(function forEach(latLng) {
+            // @alekzonder fix _latlngs
+            polygon._latlngs[0].forEach(function forEach(latLng) {
 
                 // Push each part into the array, because relying on the polygon's "_parts" array
                 // isn't safe since they are removed when parts of the polygon aren't visible.
@@ -810,12 +822,12 @@
                     return;
                 }
 
-                polygon._latlngs = [];
+                polygon._latlngs = [[]];
 
                 polygon._parts[0].forEach(function forEach(edge) {
 
                     // Iterate over all of the parts to update the latLngs to clobber the redrawing upon zooming.
-                    polygon._latlngs.push(this.map.layerPointToLatLng(edge));
+                    polygon._latlngs[0].push(this.map.layerPointToLatLng(edge));
 
                 }.bind(this));
 
@@ -923,11 +935,13 @@
                         var polygon = this.map._layers[layerIndex];
 
                         // Ensure we're dealing with a <g> node that was created by FreeDraw (...an SVG group element).
-                        if (polygon._container && polygon._container.tagName.toUpperCase() === GROUP_TAG) {
+
+                        // @alekzonder fix
+                        // if (polygon._path && polygon._path.tagName.toUpperCase() === GROUP_TAG) {
                             if (polygon instanceof L.FreeDraw.Polygon) {
                                 polygons.push(polygon);
                             }
-                        }
+                        // }
 
                     }
 
@@ -967,7 +981,7 @@
                     allPoints = [];
 
                 allPolygons.forEach(function forEach(polygon) {
-                    allPoints.push(this.latLngsToClipperPoints(polygon._latlngs));
+                    allPoints.push(this.latLngsToClipperPoints(polygon._latlngs[0]));
                 }.bind(this));
 
                 var polygons = ClipperLib.Clipper.SimplifyPolygons(allPoints, ClipperLib.PolyFillType.pftNonZero);
@@ -1101,7 +1115,9 @@
             this.getPolygons(true).forEach(function forEach(polygon) {
 
                 // Ensure the polygon is visible.
-                latLngs.push(polygon._latlngs);
+                if (polygon._latlngs && polygon._latlngs[0]) {
+                    latLngs.push(polygon._latlngs[0]);
+                }
 
             }.bind(this));
 
@@ -1173,7 +1189,9 @@
             var polygons = this.getPolygons(true),
                 allEmpty = polygons.every(function every(polygon) {
 
-                    var path = polygon._container.lastChild.getAttribute('d').trim();
+                    // @alekzonder fix
+                    // var path = polygon._container.lastChild.getAttribute('d').trim();
+                    var path = polygon._path.getAttribute('d').trim();
                     return path === EMPTY_PATH;
 
                 });
@@ -1233,13 +1251,38 @@
 
                 }
 
-                return polygon._latlngs.map(function map(latLng) {
-                    return this.map.latLngToLayerPoint(latLng);
-                }.bind(this));
+
+                // @alekzonder fix
+                //
+                var latLngs, mapped;
+
+                if (polygon._latlngs.length === 1) {
+                    latLngs = polygon._latlngs[0];
+
+                    mapped = latLngs.map(function map(latLng) {
+                        var p = this.map.latLngToLayerPoint(latLng);
+                        return p;
+                    }.bind(this));
+
+                    return mapped;
+
+                } else {
+                    latLngs = polygon._latlngs;
+
+                    return latLngs.map(function map(latLng) {
+                        var p = this.map.latLngToLayerPoint(latLng);
+                        return p;
+                    }.bind(this));
+                }
+
+                // -----
+
 
             }.bind(this);
 
-            var parts     = this.uniqueLatLngs(originalLatLngs(polygon)),
+            var or = originalLatLngs(polygon);
+
+            var parts     = this.uniqueLatLngs(or),
                 indexOf   = this.polygons.indexOf(polygon),
                 edgeCount = 0;
 
@@ -1621,6 +1664,7 @@
     };
 
 })(window, window.L, window.d3, window.ClipperLib);
+
 
 (function() {
 
