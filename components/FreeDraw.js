@@ -926,7 +926,7 @@
                  * @constant GROUP_TAG
                  * @type {String}
                  */
-                var GROUP_TAG = 'G';
+                // var GROUP_TAG = 'G';
 
                 for (var layerIndex in this.map._layers) {
 
@@ -1301,7 +1301,8 @@
                     latLng = this.map.layerPointToLatLng(point);
 
                 edge = L.marker(latLng, {
-                    icon: edge
+                    icon: edge,
+                    draggable: true
                 }).addTo(this.map);
 
                 // Setup the freedraw object with the meta data.
